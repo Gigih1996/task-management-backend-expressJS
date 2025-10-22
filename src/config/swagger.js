@@ -1,4 +1,5 @@
 const swaggerJsDoc = require('swagger-jsdoc');
+const path = require('path');
 
 const swaggerOptions = {
   definition: {
@@ -22,7 +23,7 @@ const swaggerOptions = {
         description: 'Development server',
       },
       {
-        url: 'https://api.example.com',
+        url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://api.example.com',
         description: 'Production server',
       },
     ],
@@ -52,7 +53,11 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./src/routes/*.js'], // Path to the API routes
+  // Use absolute path for Vercel serverless environment
+  apis: [
+    path.join(__dirname, '../routes/*.js'),
+    path.join(process.cwd(), 'src/routes/*.js')
+  ],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
