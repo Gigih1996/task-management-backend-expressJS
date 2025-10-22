@@ -3,28 +3,17 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/database');
+const swaggerDocs = require('./config/swagger');
 const errorHandler = require('./middleware/errorHandler');
 
 // Load environment variables
 dotenv.config();
 
+// Connect to database
+connectDB();
+
 // Initialize express app
 const app = express();
-
-// Connect to database on first request (for serverless)
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Database connection failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
-    });
-  }
-});
 
 // Middleware
 app.use(cors());
@@ -35,24 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
 
-// Swagger Documentation - lazy load to avoid initialization issues
-app.use('/api-docs', swaggerUi.serve);
-app.get('/api-docs', (req, res, next) => {
-  try {
-    const swaggerDocs = require('./config/swagger');
-    swaggerUi.setup(swaggerDocs, {
-      customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'Express API Documentation',
-    })(req, res, next);
-  } catch (error) {
-    console.error('Swagger initialization error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'API documentation is temporarily unavailable',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
-  }
-});
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Express API Documentation',
+}));
 
 // Health check route
 app.get('/', (req, res) => {
