@@ -84,7 +84,7 @@ exports.login = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'Invalid credentials',
       });
@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
     // Check if password matches
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'Invalid credentials',
       });
@@ -101,7 +101,7 @@ exports.login = async (req, res) => {
 
     // Check if user is active
     if (!user.isActive) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'User account is deactivated',
       });
