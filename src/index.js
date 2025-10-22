@@ -51,11 +51,12 @@ app.use((req, res) => {
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
+// Start server (only in development, not in Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`
+  const server = app.listen(PORT, () => {
+    console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
 ║   🚀 Express.js Server is running                    ║
@@ -65,13 +66,15 @@ const server = app.listen(PORT, () => {
 ║   📚 API Docs: http://localhost:${PORT}/api-docs        ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
-  `);
-});
+    `);
+  });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error(`Error: ${err.message}`);
-  server.close(() => process.exit(1));
-});
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (err) => {
+    console.error(`Error: ${err.message}`);
+    server.close(() => process.exit(1));
+  });
+}
 
+// Export for Vercel serverless
 module.exports = app;
