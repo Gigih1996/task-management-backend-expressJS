@@ -37,7 +37,6 @@ const taskSchema = new mongoose.Schema(
     due_date: {
       type: Date,
       required: [true, 'Due date is required'],
-      index: true,
     },
   },
   {
